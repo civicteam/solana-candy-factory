@@ -12,10 +12,14 @@ import Countdown from 'react-countdown';
 import { RecaptchaButton } from '../components/recaptcha-button';
 import {faCheckCircle, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {useGatekeeperNetwork} from "../hooks/use-gateway";
+import {IdentityButton, useGateway} from "@civic/solana-gateway-react";
 
 const Home = () => {
   const [balance] = useWalletBalance()
   const [isActive, setIsActive] = useState(false);
+  const { gatekeeperNetwork } = useGatekeeperNetwork()
+  const { gatewayToken } = useGateway()
   const wallet = useWallet();
 
   const { isSoldOut, mintStartDate, isMinting, onMint, onMintMultiple, nftsData, walletPermissioned } = useCandyMachine()
@@ -39,9 +43,7 @@ const Home = () => {
           width={200}
           alt="Candy Image" />
 
-        <span className="text-gray-800 font-bold text-2xl cursor-default">
-          THIS IS THE BEST CANDY MACHINE EVER
-        </span>
+        { gatekeeperNetwork && <IdentityButton/>}
 
         {!wallet.connected && <span
           className="text-gray-800 font-bold text-2xl cursor-default">
@@ -50,6 +52,7 @@ const Home = () => {
 
         {wallet.connected &&
           <div className="inline-flex" title={walletPermissioned ? 'Wallet is permitted to mint' : 'Wallet is not permitted to mint'}>
+            { gatewayToken ? gatewayToken.publicKey.toBase58() : "NO GT"}
             { walletPermissioned !== undefined && ( 
               walletPermissioned ? 
               <FontAwesomeIcon icon={faCheckCircle} className="w-4" color="green" /> : 
