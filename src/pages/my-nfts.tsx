@@ -1,7 +1,7 @@
 import Head from 'next/head'
 
 import { Toaster } from 'react-hot-toast';
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@identity.com/wallet-adapter-react";
 import Header from '../components/header';
 import Footer from '../components/footer';
 import useWalletNfts from '../hooks/use-wallet-nfts';

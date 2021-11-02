@@ -1,6 +1,6 @@
 const withTM = require('next-transpile-modules')([
-  '@solana/wallet-adapter-base',
-  '@solana/wallet-adapter-react']
+  '@identity.com/wallet-adapter-base',
+  '@identity.com/wallet-adapter-react']
 );
 
 /** @type {import('next').NextConfig} */

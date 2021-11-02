@@ -1,9 +1,10 @@
 import '../styles/globals.css'
 import { useMemo } from "react";
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { WalletAdapterNetwork } from "@identity.com/wallet-adapter-base";
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 let WALLETS: any = {
+  getCryptidWallet: () => ({ name: 'Cryptid' }),
   getPhantomWallet: () => ({ name: 'Phantom' }),
   getSolflareWallet: () => ({ name: 'Solflare' }),
   getSolletWallet: () => ({ name: 'Sollet' }),
@@ -12,15 +13,15 @@ let WALLETS: any = {
   getSolletExtensionWallet: () => ({ name: 'SolletExtension' })
 };
 if (typeof window !== "undefined") {
-  WALLETS = require("@solana/wallet-adapter-wallets");
+  WALLETS = require("@identity.com/wallet-adapter-wallets");
 }
 
 import {
   ConnectionProvider,
   WalletProvider,
-} from "@solana/wallet-adapter-react";
-import "@solana/wallet-adapter-react-ui/styles.css";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+} from "@identity.com/wallet-adapter-react";
+import "@identity.com/wallet-adapter-react-ui/styles.css";
+import { WalletModalProvider } from "@identity.com/wallet-adapter-react-ui";
 import { WalletBalanceProvider } from '../hooks/use-wallet-balance';
 
 const network = process.env.NEXT_PUBLIC_SOLANA_NETWORK as WalletAdapterNetwork;
@@ -30,6 +31,7 @@ const App = ({ Component, pageProps }: any) => {
 
   const wallets = useMemo(
     () => [
+      WALLETS.getCryptidWallet(),
       WALLETS.getPhantomWallet(),
       WALLETS.getSolflareWallet(),
       WALLETS.getSolletWallet({ network }),

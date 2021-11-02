@@ -1,4 +1,4 @@
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet } from '@identity.com/wallet-adapter-react';
 import React, { useEffect, useState } from 'react';
 import * as anchor from "@project-serum/anchor";
 import { getNftsForOwner } from '../utils/candy-machine';

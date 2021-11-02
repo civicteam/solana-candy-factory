@@ -1,4 +1,4 @@
-import { WalletDisconnectButton, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { WalletDisconnectButton, WalletMultiButton } from '@identity.com/wallet-adapter-react-ui';
 import React from 'react';
 import Link from 'next/link'
 

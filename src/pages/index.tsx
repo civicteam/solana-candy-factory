@@ -2,7 +2,7 @@ import Head from 'next/head'
 
 import { useState } from "react";
 import { Toaster } from 'react-hot-toast';
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@identity.com/wallet-adapter-react";
 import useCandyMachine from '../hooks/use-candy-machine';
 import Header from '../components/header';
 import Footer from '../components/footer';
