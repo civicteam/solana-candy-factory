@@ -13,5 +13,5 @@ elif [ ${STAGE} == "dev" ]; then
   BUCKET=explorer-dev.identity.com
 fi
 
-npx deploy-aws-s3-cloudfront --non-interactive --source public --bucket ${BUCKET} --destination ${STAGE} --distribution ${DISTRIBUTION}
+npx deploy-aws-s3-cloudfront --non-interactive --source out --bucket ${BUCKET} --destination ${STAGE} --distribution ${DISTRIBUTION}
 
