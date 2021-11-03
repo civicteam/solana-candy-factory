@@ -293,66 +293,14 @@ export const mintOneToken = async (
   treasury: anchor.web3.PublicKey,
   gatekeeperNetwork?: anchor.web3.PublicKey,
 ): Promise<string> => {
-  const mint = anchor.web3.Keypair.generate();
-  const token = await getTokenWallet(payer, mint.publicKey);
-  const { connection, program } = candyMachine;
-  const metadata = await getMetadata(mint.publicKey);
-  const masterEdition = await getMasterEdition(mint.publicKey);
-  const rent = await connection.getMinimumBalanceForRentExemption(
-    MintLayout.span
-  );
-  const remainingAccounts = await getRemainingAccounts(candyMachine, payer, gatekeeperNetwork);
 
-  return await program.rpc.mintNft({
-    accounts: {
-      config,
-      candyMachine: candyMachine.id,
-      payer: payer,
-      wallet: treasury,
-      mint: mint.publicKey,
-      metadata,
-      masterEdition,
-      mintAuthority: payer,
-      updateAuthority: payer,
-      tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-      tokenProgram: TOKEN_PROGRAM_ID,
-      systemProgram: anchor.web3.SystemProgram.programId,
-      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-      clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-    },
-    remainingAccounts,
-    signers: [mint],
-    instructions: [
-      anchor.web3.SystemProgram.createAccount({
-        fromPubkey: payer,
-        newAccountPubkey: mint.publicKey,
-        space: MintLayout.span,
-        lamports: rent,
-        programId: TOKEN_PROGRAM_ID,
-      }),
-      Token.createInitMintInstruction(
-        TOKEN_PROGRAM_ID,
-        mint.publicKey,
-        0,
-        payer,
-        payer
-      ),
-      createAssociatedTokenAccountInstruction(
-        token,
-        payer,
-        payer,
-        mint.publicKey
-      ),
-      Token.createMintToInstruction(
-        TOKEN_PROGRAM_ID,
-        mint.publicKey,
-        token,
-        payer,
-        [],
-        1
-      ),
-    ],
-  });
+  const ret = await mintMultipleToken(candyMachine, config, payer, treasury, gatekeeperNetwork, 1)
+
+  if (typeof ret === 'number') {
+    throw new Error('Failed on exuting transaction number ' + ret)
+  }
+
+  return ret[0]
 }
 
 export const shortenAddress = (address: string, chars = 4): string => {
@@ -382,7 +330,7 @@ export const mintMultipleToken = async (
     const rent = await connection.getMinimumBalanceForRentExemption(
       MintLayout.span
     );
-    const instructions = [
+    const preInstructions = [
       anchor.web3.SystemProgram.createAccount({
         fromPubkey: payer,
         newAccountPubkey: mint.publicKey,
@@ -412,10 +360,17 @@ export const mintMultipleToken = async (
         1
       ),
     ];
+
+    const signers: anchor.web3.Keypair[] = [mint];
+
+    signersMatrix.push(signers)
+    instructionsMatrix.push(preInstructions)
+
+
     const masterEdition = await getMasterEdition(mint.publicKey);
     const metadata = await getMetadata(mint.publicKey);
   
-    instructions.push(
+    const instructions = [
       await candyMachine.program.instruction.mintNft({
         accounts: {
           config,
@@ -434,12 +389,11 @@ export const mintMultipleToken = async (
           clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
         },
         remainingAccounts,
-      }),
-    );
-    const signers: anchor.web3.Keypair[] = [mint];
+      })]
 
-    signersMatrix.push(signers)
+    // we need to push signers twice (once for each item in instructionsMatrix)
     instructionsMatrix.push(instructions)
+    signersMatrix.push(signers)
   }
 
   return await sendTransactions(

@@ -91,14 +91,16 @@ export const sendTransactions = async (
       ...signers.map(s => s.publicKey),
     );
 
-    if (signers.length > 0) {
-      transaction.partialSign(...signers);
-    }
-
     unsignedTxns.push(transaction);
   }
 
   const signedTxns = await wallet.signAllTransactions(unsignedTxns);
+
+  for (let i = 0; i < instructionSet.length; i++) {
+    const signers = signersSet[i];
+    signedTxns[i].partialSign(...signers);
+  }
+
 
   const pendingTxns: Promise<{ txid: string; slot: number }>[] = [];
 
