@@ -297,7 +297,7 @@ export const mintOneToken = async (
   const ret = await mintMultipleToken(candyMachine, config, payer, treasury, gatekeeperNetwork, 1)
 
   if (typeof ret === 'number') {
-    throw new Error('Failed on exuting transaction number ' + ret)
+    throw new Error('Failed on executing transaction number ' + ret)
   }
 
   return ret[0]
