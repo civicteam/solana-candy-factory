@@ -17,7 +17,8 @@
     "setup-solana-main": "./devtools/main/setup-solana-main.sh",
     "setup-metaplex-main": "node ./devtools/main/setup-metaplex-main.js",
     "setup-envs-main": "node ./devtools/main/setup-envs-main.js",
-    "deploy-mainnet": "yarn setup-solana-main && yarn setup-metaplex-main && yarn setup-envs-main"
+    "deploy-mainnet": "yarn setup-solana-main && yarn setup-metaplex-main && yarn setup-envs-main",
+    "deploy:s3": "STAGE=${STAGE:-dev} etc/deploy/deploy-site.sh"
   },
   "dependencies": {
     "@civic/solana-gateway-react": "^0.4.1",
