@@ -14,6 +14,7 @@ import {faCheckCircle, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useGatekeeperNetwork} from "../hooks/use-gateway";
 import {IdentityButton, useGateway} from "@civic/solana-gateway-react";
+import {IconLogo} from "../components/IconLogo";
 
 const Home = () => {
   const [balance] = useWalletBalance()
@@ -36,13 +37,15 @@ const Home = () => {
       <Header />
 
       <div className="flex flex-col justify-center items-center flex-1 space-y-3 mt-20">
-        <img
-          className="rounded-md shadow-lg"
-          src={`/candy.jpeg`}
-          height={200}
-          width={200}
-          alt="Candy Image" />
-
+        <div style={{height: '300px'}}>
+          <IconLogo width="250" height="250"/>
+          <p style={{
+            position: 'relative',
+            top: '-100px',
+            fontSize: '6rem',
+            textAlign: 'end'
+          }}>🍭</p>
+        </div>
         { gatekeeperNetwork && <IdentityButton/>}
 
         {!wallet.connected && <span
@@ -52,7 +55,7 @@ const Home = () => {
 
         {wallet.connected &&
           <div className="inline-flex" title={walletPermissioned ? 'Wallet is permitted to mint' : 'Wallet is not permitted to mint'}>
-            { gatewayToken ? gatewayToken.publicKey.toBase58() : "NO GT"}
+            {/*{ gatewayToken ? gatewayToken.publicKey.toBase58() : "NO GT"}*/}
             { walletPermissioned !== undefined && ( 
               walletPermissioned ? 
               <FontAwesomeIcon icon={faCheckCircle} className="w-4" color="green" /> : 
