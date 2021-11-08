@@ -3,7 +3,7 @@ set -e
 set -u
 
 if [ "${STAGE}" == "prod" ]; then
-  DISTRIBUTION=???
+  DISTRIBUTION=E2CB7ZXDUJDVY6
   BUCKET=candy.civic.finance
 elif [ ${STAGE} == "preprod" ]; then
   DISTRIBUTION=???
