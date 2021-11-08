@@ -13,6 +13,7 @@ const Header: React.FC = () => {
       </Link>
     </div>
     <div className="flex space-x-5 items-center">
+      <div className="text-black space-x-5 text-lg font-bold flex items-center">Cluster: devnet</div>
       <WalletMultiButton />
       <WalletDisconnectButton />
     </div>
