@@ -17,14 +17,17 @@
     "setup-solana-main": "./devtools/main/setup-solana-main.sh",
     "setup-metaplex-main": "node ./devtools/main/setup-metaplex-main.js",
     "setup-envs-main": "node ./devtools/main/setup-envs-main.js",
-    "deploy-mainnet": "yarn setup-solana-main && yarn setup-metaplex-main && yarn setup-envs-main"
+    "deploy-mainnet": "yarn setup-solana-main && yarn setup-metaplex-main && yarn setup-envs-main",
+    "deploy:s3": "STAGE=${STAGE:-dev} etc/deploy/deploy-site.sh"
   },
   "dependencies": {
+    "@civic/solana-gateway-react": "^0.3.20",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-brands-svg-icons": "^5.15.4",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.15",
     "@headlessui/react": "^1.4.1",
+    "@identity.com/solana-gateway-ts": "^0.3.3",
     "@metaplex/js": "^1.1.1",
     "@project-serum/anchor": "0.17.1-beta.1",
     "@solana/spl-token": "^0.1.8",
@@ -37,6 +40,8 @@
     "got": "^11.8.2",
     "looks-same": "^7.3.0",
     "next": "11.1.2",
+    "next-compose-plugins": "^2.2.1",
+    "next-images": "^1.8.1",
     "next-seo": "^4.28.1",
     "next-transpile-modules": "^8.0.0",
     "patch-package": "^6.4.7",
