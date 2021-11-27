@@ -20,7 +20,7 @@
     "deploy-mainnet": "yarn setup-solana-main && yarn setup-metaplex-main && yarn setup-envs-main"
   },
   "dependencies": {
-    "@civic/token-guard": "^0.0.4",
+    "@civic/token-guard": "^0.0.9",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-brands-svg-icons": "^5.15.4",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",

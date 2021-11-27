@@ -173,10 +173,10 @@
     eip1193-provider "^1.0.1"
     js-sha3 "^0.8.0"
 
-"@civic/token-guard@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@civic/token-guard/-/token-guard-0.0.4.tgz#f348d3a1e8eeebd004ecbadaea904d85b0fccef5"
-  integrity sha512-j7qtmfrIp92RQvxXSR7XcgOdX0IgAmDL9plHANtj3KT3/y+mSwFPlqTDebNawTXbtOTXGyhtcUm3n9zGbRCEkA==
+"@civic/token-guard@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@civic/token-guard/-/token-guard-0.0.9.tgz#7d0ebbc85227c37a4ee29231a1394fb9d1457e9e"
+  integrity sha512-34+zqKUbP/JaS0IkJq8tWXI95jRVXYrd/5PQ/VabU3D2phrawriBvknSQ9MDidm+e7nRMFCcZLeaJr/iaubu/A==
   dependencies:
     "@identity.com/solana-gateway-ts" "^0.3.3"
     "@oclif/command" "^1.8.3"
