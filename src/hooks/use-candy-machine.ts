@@ -4,9 +4,11 @@ import { awaitTransactionSignatureConfirmation, CandyMachine, getCandyMachineSta
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from 'react-hot-toast';
 import useWalletBalance from "./use-wallet-balance";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import {LAMPORTS_PER_SOL, TransactionInstruction} from "@solana/web3.js";
 import { sleep } from "../utils/utility";
 import useTokenGuard from "./use-token-guard";
+import {GatewayToken} from "@identity.com/solana-gateway-ts";
+import {TokenGuardState} from "@civic/token-guard";
 
 // get the price from a public env var so that it can be dynamically configured
 const MINT_PRICE_SOL = Number(process.env.NEXT_PUBLIC_MINT_PRICE_SOL)
@@ -28,13 +30,15 @@ const connection = new anchor.web3.Connection(rpcHost);
 
 const txTimeout = 30000;
 
+let x = 1;
+
+type Props = { tokenGuardExchange: (amount: number) => Promise<TransactionInstruction[]> | null, tokenGuardState?: TokenGuardState, gatewayToken?: GatewayToken }
 export default function useCandyMachine() {
   const [, setBalance] = useWalletBalance()
   const [candyMachine, setCandyMachine] = useState<CandyMachine>();
   // load the tokenGuard state (used to identify the gatekeeper network),
   // gateway token for the current wallet
   // and a function that generates tokenGuard instructions
-  const { tokenGuardExchange, tokenGuardState, gatewayToken } = useTokenGuard();
   const wallet = useWallet();
   const [nftsData, setNftsData] = useState<any>({} = {
     itemsRemaining: 0,
@@ -44,9 +48,6 @@ export default function useCandyMachine() {
   const [isMinting, setIsMinting] = useState(false);
   const [isSoldOut, setIsSoldOut] = useState(false);
   const [mintStartDate, setMintStartDate] = useState(new Date(parseInt(process.env.NEXT_PUBLIC_CANDY_START_DATE!, 10)));
-
-  // a wallet is allowed to mint if the candymachine is not permissioned, or if there is a gateway token present
-  const walletPermissioned = tokenGuardState?.gatekeeperNetwork ? !!gatewayToken : undefined;
 
   useEffect(() => {
     (async () => {
@@ -98,72 +99,81 @@ export default function useCandyMachine() {
     })();
   }, [wallet, candyMachineId, connection, isMinting]);
 
-  const onMint = async () => {
-    try {
-      setIsMinting(true);
-      const anchorWallet = {
-        publicKey: wallet.publicKey,
-        signAllTransactions: wallet.signAllTransactions,
-        signTransaction: wallet.signTransaction,
-      } as anchor.Wallet;
-      const { candyMachine } =
-        await getCandyMachineState(
-          anchorWallet,
-          candyMachineId,
-          connection
-        );
+  const onMint = async ({tokenGuardState, tokenGuardExchange}: Props) => {
+    console.log("onMint tokenGuardState", tokenGuardState);
+      try {
+        setIsMinting(true);
+        const anchorWallet = {
+          publicKey: wallet.publicKey,
+          signAllTransactions: wallet.signAllTransactions,
+          signTransaction: wallet.signTransaction,
+        } as anchor.Wallet;
+        const {candyMachine} =
+          await getCandyMachineState(
+            anchorWallet,
+            candyMachineId,
+            connection
+          );
 
-      if (wallet.connected && candyMachine?.program && wallet.publicKey && tokenGuardState && tokenGuardExchange) {
-        const mintTxId = await mintOneToken(
-          candyMachine,
-          config,
-          wallet.publicKey,
-          treasury,
+        console.log({
+          isConnected: wallet.connected,
+          program: candyMachine?.program,
+          publicKey: wallet.publicKey,
           tokenGuardState,
-          tokenGuardExchange
-        );
+          tokenGuardExchange,
+        });
 
-        const status = await awaitTransactionSignatureConfirmation(
-          mintTxId,
-          txTimeout,
-          connection,
-          "singleGossip",
-          false
-        );
+        if (wallet.connected && candyMachine?.program && wallet.publicKey && tokenGuardState && tokenGuardExchange) {
+          const mintTxId = await mintOneToken(
+            candyMachine,
+            config,
+            wallet.publicKey,
+            treasury,
+            tokenGuardState,
+            tokenGuardExchange
+          );
 
-        if (!status?.err) {
-          toast.success("Congratulations! Mint succeeded! Check the 'My Arts' page :)")
+          const status = await awaitTransactionSignatureConfirmation(
+            mintTxId,
+            txTimeout,
+            connection,
+            "singleGossip",
+            false
+          );
+
+          if (!status?.err) {
+            toast.success("Congratulations! Mint succeeded! Check the 'My Arts' page :)")
+          } else {
+            toast.error("Mint failed! Please try again!")
+          }
+        }
+      } catch (error: any) {
+        let message = error.msg || "Minting failed! Please try again!";
+        if (!error.msg) {
+          if (error.message.indexOf("0x138")) {
+          } else if (error.message.indexOf("0x137")) {
+            message = `SOLD OUT!`;
+          } else if (error.message.indexOf("0x135")) {
+            message = `Insufficient funds to mint. Please fund your wallet.`;
+          }
         } else {
-          toast.error("Mint failed! Please try again!")
+          if (error.code === 311) {
+            message = `SOLD OUT!`;
+            setIsSoldOut(true);
+          } else if (error.code === 312) {
+            message = `Minting period hasn't started yet.`;
+          }
         }
-      }
-    } catch (error: any) {
-      let message = error.msg || "Minting failed! Please try again!";
-      if (!error.msg) {
-        if (error.message.indexOf("0x138")) {
-        } else if (error.message.indexOf("0x137")) {
-          message = `SOLD OUT!`;
-        } else if (error.message.indexOf("0x135")) {
-          message = `Insufficient funds to mint. Please fund your wallet.`;
+        toast.error(message)
+      } finally {
+        if (wallet?.publicKey) {
+          const balance = await connection.getBalance(wallet?.publicKey);
+          setBalance(balance / LAMPORTS_PER_SOL);
         }
-      } else {
-        if (error.code === 311) {
-          message = `SOLD OUT!`;
-          setIsSoldOut(true);
-        } else if (error.code === 312) {
-          message = `Minting period hasn't started yet.`;
-        }
+        setIsMinting(false);
       }
-      toast.error(message)
-    } finally {
-      if (wallet?.publicKey) {
-        const balance = await connection.getBalance(wallet?.publicKey);
-        setBalance(balance / LAMPORTS_PER_SOL);
-      }
-      setIsMinting(false);
-    }
   };
-
+  
   const onMintMultiple = async (quantity: number) => {
     try {
       setIsMinting(true);
@@ -260,5 +270,5 @@ export default function useCandyMachine() {
   };
 
 
-  return { isSoldOut, mintStartDate, isMinting, nftsData, onMint, onMintMultiple, walletPermissioned }
+  return { isSoldOut, mintStartDate, isMinting, nftsData, onMint, onMintMultiple }
 }

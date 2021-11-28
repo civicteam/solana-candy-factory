@@ -8,7 +8,7 @@ const withImages = require('next-images');
 
 const plugins = [
   withTM,
-  withImages
+  // withImages
 ]
 
 /** @type {import('next').NextConfig} */

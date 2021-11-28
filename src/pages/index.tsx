@@ -15,6 +15,8 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useGatekeeperNetwork} from "../hooks/use-gateway";
 import {IdentityButton, useGateway} from "@civic/solana-gateway-react";
 import {IconLogo} from "../components/IconLogo";
+import useTokenGuard from "../hooks/use-token-guard";
+import {Button} from "@solana/wallet-adapter-react-ui/lib/Button";
 
 const Home = () => {
   const [balance] = useWalletBalance()
@@ -22,8 +24,14 @@ const Home = () => {
   const { gatekeeperNetwork } = useGatekeeperNetwork()
   const { gatewayToken } = useGateway()
   const wallet = useWallet();
-
-  const { isSoldOut, mintStartDate, isMinting, onMint, onMintMultiple, nftsData, walletPermissioned } = useCandyMachine()
+  const tokenGuard = useTokenGuard();
+  const { isSoldOut, mintStartDate, isMinting, onMint, nftsData } = useCandyMachine()
+  
+  const walletPermissioned = !!gatewayToken;
+  
+  console.log("tokenGuard", tokenGuard)
+  
+  const mint = () => onMint(tokenGuard);
   
   return (
     <main className="p-5">
@@ -74,11 +82,9 @@ const Home = () => {
 
         <div className="flex flex-col justify-start items-start">
           {wallet.connected &&
-            <RecaptchaButton
-              actionName="mint"
-              // checking explicitly for walletPermissioned === false as undefined means "not needed"
-              disabled={isSoldOut || isMinting || !isActive || (walletPermissioned === false)}
-              onClick={onMint}
+            <Button
+              disabled={isSoldOut || isMinting || !isActive || !walletPermissioned}
+              onClick={mint}
             >
               {isSoldOut ? (
                 "SOLD OUT"
@@ -91,28 +97,7 @@ const Home = () => {
                   renderer={renderCounter}
                 />
               }
-            </RecaptchaButton>
-          }
-
-          {wallet.connected &&
-            <RecaptchaButton
-              actionName="mint5"
-              // checking explicitly for walletPermissioned === false as undefined means "not needed"
-              disabled={isSoldOut || isMinting || !isActive || (walletPermissioned === false)}  
-              onClick={() => onMintMultiple(5)}
-            >
-              {isSoldOut ? (
-                "SOLD OUT"
-              ) : isActive ?
-                <span>MINT 5 {isMinting && 'LOADING...'}</span> :
-                <Countdown
-                  date={mintStartDate}
-                  onMount={({ completed }) => completed && setIsActive(true)}
-                  onComplete={() => setIsActive(true)}
-                  renderer={renderCounter}
-                />
-              }
-            </RecaptchaButton>
+            </Button>
           }
         </div>
         <Footer />
