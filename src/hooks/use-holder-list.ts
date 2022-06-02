@@ -2,9 +2,10 @@ import * as anchor from "@project-serum/anchor";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { programs } from '@metaplex/js';
 import allMarkets from "../utils/ marketplaces";
-const { metadata: { Metadata, MetadataProgram } } = programs
+import { programs } from '@metaplex/js';
+
+const { Metadata, MetadataProgram } = programs.metadata;
 
 const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
 const connection = new anchor.web3.Connection(rpcHost);

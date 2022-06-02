@@ -20,11 +20,13 @@
     "deploy-mainnet": "yarn setup-solana-main && yarn setup-metaplex-main && yarn setup-envs-main"
   },
   "dependencies": {
+    "@civic/token-guard": "^0.0.9",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-brands-svg-icons": "^5.15.4",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.15",
     "@headlessui/react": "^1.4.1",
+    "@identity.com/solana-gateway-ts": "^0.3.3",
     "@metaplex/js": "^3.0.0",
     "@project-serum/anchor": "0.17.1-beta.1",
     "@solana/spl-token": "^0.1.8",

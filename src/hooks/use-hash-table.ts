@@ -3,7 +3,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { programs } from '@metaplex/js';
-const { metadata: { Metadata, MetadataProgram } } = programs
+
+const { Metadata, MetadataProgram } = programs.metadata;
 
 const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
 const connection = new anchor.web3.Connection(rpcHost);

@@ -5,11 +5,16 @@ import {
   TOKEN_PROGRAM_ID,
   Token,
 } from "@solana/spl-token";
-import { programs } from '@metaplex/js';
-const { metadata: { Metadata } } = programs
 import axios from "axios";
 import { sendTransactions } from "./utility";
 import { fetchHashTable } from "../hooks/use-hash-table";
+import {TransactionInstruction} from "@solana/web3.js";
+import {TokenGuardState} from "@civic/token-guard";
+import { programs } from "@metaplex/js";
+
+const {Metadata} = programs.metadata;
+
+const MINT_PRICE_SOL = Number(process.env.NEXT_PUBLIC_MINT_PRICE_SOL)
 
 export const CANDY_MACHINE_PROGRAM = new anchor.web3.PublicKey(
   "cndyAnrLdpjq1Ssp1z8xxDsB8dxe7u4HL5Nxi2K5WXZ"
@@ -278,6 +283,9 @@ export const mintOneToken = async (
   config: anchor.web3.PublicKey,
   payer: anchor.web3.PublicKey,
   treasury: anchor.web3.PublicKey,
+  tokenGuardState: TokenGuardState,
+  // a function that creates tokenGuard exchange instructions
+  tokenGuardExchange: (amount: number) => Promise<TransactionInstruction[]> | null
 ): Promise<string> => {
   const mint = anchor.web3.Keypair.generate();
   const token = await getTokenWallet(payer, mint.publicKey);
@@ -287,7 +295,26 @@ export const mintOneToken = async (
   const rent = await connection.getMinimumBalanceForRentExemption(
     MintLayout.span
   );
+  // The payer will be paying newly-minted SPL tokens instead of Sol
+  const payerAta = await getTokenWallet(payer, tokenGuardState.outMint);
+  const remainingAccounts = [{
+    pubkey: payerAta,
+    isWritable: true,
+    isSigner: false,
+  },{
+    pubkey: payer,
+    isWritable: false,
+    isSigner: true,
+  }];
 
+  // get the token guard instructions and add them to the tx
+  const amount = MINT_PRICE_SOL * 1e9;
+  const tokenGuardInstructions = await tokenGuardExchange(amount);
+  
+  // this might happen if the function is called before the tokenguard is loaded
+  // the UI layer should protect against this.
+  if (!tokenGuardInstructions) throw new Error("Unable to create tokenGuard instructions")
+  
   return await program.rpc.mintNft({
     accounts: {
       config,
@@ -305,8 +332,12 @@ export const mintOneToken = async (
       rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
     },
+    remainingAccounts,
     signers: [mint],
     instructions: [
+      // include the tokenGuard instructions, which
+      // exchange sol for the tokenGuard program
+      ...(tokenGuardInstructions),
       anchor.web3.SystemProgram.createAccount({
         fromPubkey: payer,
         newAccountPubkey: mint.publicKey,

@@ -18,6 +18,8 @@ export const RecaptchaButton = ({
   const handleReCaptchaVerify = useCallback(async () => {
     if (!executeRecaptcha) {
       console.debug('Execute recaptcha not yet available');
+      // continue anyway
+      await onClick()
       return;
     }
     setValidating(true)
